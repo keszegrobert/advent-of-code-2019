@@ -19,3 +19,4 @@ if(NOT GTEST_FOUND)
 endif()
 
 add_subdirectory(day01)
+add_subdirectory(day02)
