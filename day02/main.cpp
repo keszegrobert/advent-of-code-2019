@@ -66,6 +66,13 @@ void print_memory(std::vector<int>& vect){
     std::cout << std::endl;
 }
 
+int compute_with_params(std::vector<int> vect, int a, int b){
+    vect[1] = a;
+    vect[2] = b;
+    compute(vect);
+    return vect[0];
+}
+
 int main(int argc, char **argv) {
     test_sample(
         {1,9,10,3,2,3,11,0,99,30,40,50},
@@ -111,9 +118,17 @@ int main(int argc, char **argv) {
         if (infile.peek() == ',')
             infile.ignore();
     }
-    vect[1] = 12;
-    vect[2] = 2;
-    compute(vect);
-    std::cout << vect[0] << std::endl;
+
+    std::cout << "part 1 solution: " << compute_with_params(vect, 12, 2) << std::endl;
+
+    for (int noun = 0; noun < 100; ++noun){
+        for (int  verb = 0; verb < 100; ++verb){
+            if (compute_with_params(vect, noun, verb) == 19690720){
+                std::cout << "part 2 solution: " << 100*noun+verb << std::endl;
+                return EXIT_SUCCESS;
+            }
+        }
+    }
+
     return EXIT_SUCCESS;
 }
