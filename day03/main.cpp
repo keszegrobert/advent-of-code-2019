@@ -10,6 +10,8 @@ class WireMap {
 private:
     std::set<std::pair<int,int>> intersections;
     std::set<std::pair<int,int>> places;
+    std::vector<std::pair<int,int>> path1;
+    std::vector<std::pair<int,int>> path2;
 
     bool parseStep(
         std::stringstream& path,
@@ -52,6 +54,7 @@ private:
             current.first += direction.first;
             current.second += direction.second;
             places.insert(current);
+            path1.push_back(current);
         }
     }
 
@@ -64,6 +67,7 @@ private:
         for (int i = 0; i < steps; ++i){
             current.first += direction.first;
             current.second += direction.second;
+            path2.push_back(current);
             if (places.find(current) != places.end())
                 intersections.insert(current);
         }
@@ -82,27 +86,45 @@ public:
     }
 
     int get_quickest_intersection_distance(){
-        return 0;
+        int mindist = INT32_MAX;
+        for (auto is: intersections)
+        {
+            int distance = 0;
+            for (auto tile: path1){
+                ++distance;
+                if (tile == is){
+                    break;
+                }
+            }
+            for (auto tile: path2){
+                ++distance;
+                if (tile == is){
+                    break;
+                }
+            }
+            if (distance < mindist)
+                mindist = distance;
+        }
+        return mindist;
     }
 
 public:
     WireMap(std::string line1, std::string line2){
-        std::stringstream path1(line1);
+        std::stringstream stream1(line1);
         std::pair<int,int> direction;
         int steps;
         std::pair<int, int> current = {0, 0};
 
         // registering the places of the first path
-        while (parseStep(path1, direction, steps)){
+        while (parseStep(stream1, direction, steps)){
             register_places(current, direction, steps);
         }
         register_places(current, direction, steps);
 
         // finding intersections
-        std::set<std::pair<int,int>> intersections;
-        std::stringstream path2(line2);
+        std::stringstream stream2(line2);
         current = {0,0};
-        while (parseStep(path2,direction, steps)){
+        while (parseStep(stream2,direction, steps)){
             find_intersections(current, direction, steps);
         }
         find_intersections(current, direction, steps);
@@ -114,22 +136,23 @@ void test_sample(
     int expected_part1, int expected_part2
 ){
     WireMap map(input1, input2);
-    int actual = map.get_closest_intersection_distance();
-    if (actual != expected_part1)
+    int actual1 = map.get_closest_intersection_distance();
+    if (actual1 != expected_part1)
         std::cout << "ERROR: while computing the distance of the closest intersection" << std::endl
                 << input1 << std::endl
                 << "and" << std::endl
                 << input2 << std::endl
                 << ", it should be " << expected_part1
-                << ", but it was " << actual
+                << ", but it was " << actual1
                 << " " << std::endl;
-    if (actual != expected_part2)
+    int actual2 = map.get_quickest_intersection_distance();
+    if (actual2 != expected_part2)
         std::cout << "ERROR: while computing the distance of the quickest intersection" << std::endl
                 << input1 << std::endl
                 << "and" << std::endl
                 << input2 << std::endl
                 << ", it should be " << expected_part2
-                << ", but it was " << actual
+                << ", but it was " << actual2
                 << " " << std::endl;
 }
 
