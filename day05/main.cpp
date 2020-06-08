@@ -13,47 +13,55 @@ public:
     }
 
     bool parseHalt(){
-        if (mem[pos] == 99)
+        if (mem[pos] % 100 == 99)
             return true;
         return false;
     }
 
     bool parseAdd(){
-        if (mem[pos] != 1)
+        if (mem[pos] % 100 != 1)
             return false;
+        int a_mode = (mem[pos]/100)%10;
+        int b_mode = (mem[pos]/1000)%10;
+        int r_mode = (mem[pos]/10000)%10;
         int a = mem[pos+1];
         int b = mem[pos+2];
         int r = mem[pos+3];
-        mem[r] = mem[a]+mem[b];
+        mem[r] = (a_mode==1?a:mem[a]) + (b_mode==1?b:mem[b]);
         return true;
     }
 
     bool parseMul(){
-        if (mem[pos] != 2)
+        if (mem[pos]%100 != 2)
             return false;
+        int a_mode = (mem[pos]/100)%10;
+        int b_mode = (mem[pos]/1000)%10;
+        int r_mode = (mem[pos]/10000)%10;
         int a = mem[pos+1];
         int b = mem[pos+2];
         int r = mem[pos+3];
-        mem[r] = mem[a]*mem[b];
+        mem[r] = (a_mode==1?a:mem[a]) * (b_mode==1?b:mem[b]);
         return true;
     }
 
     bool parseStore(){
-        if (mem[pos] != 3)
+        if (mem[pos]%100 != 3)
             return false;
         int a = mem[pos+1];
         int tmp = 0;
-        // std::cin >> tmp;
-        //mem[a] = tmp;
+        std::cout << std::endl << "awaiting input:";
+        std::cin >> tmp;
+        mem[a] = tmp;
         return true;
     }
 
     bool parsePrint(){
-        if (mem[pos] != 3)
+        if (mem[pos]%100 != 4)
             return false;
         int a = mem[pos+1];
+        int a_mode = (mem[pos]/100)%10;
         int tmp = 0;
-        //mem[a] = tmp;
+        std::cout << std::endl<< "STDOUT:" << (a_mode==1?a:mem[a]);
         return true;
     }
 
@@ -72,7 +80,8 @@ public:
                 pos += 2;
             else
             {
-                std::cout << "Something went wrong" << std::endl;
+                std::cout << "Something went wrong, instruction:"
+                          << mem[pos] << "couldn't be processed"<< std::endl;
                 break;
             }
         }
@@ -94,13 +103,14 @@ public:
 void test_sample(std::vector<int> input, std::vector<int> expected){
     Terminal t(input);
     t.compute();
-    t.print_memory(input);
-    for (size_t i = 0; i < input.size(); ++i)
+    std::vector<int> output;
+    t.print_memory(output);
+    for (size_t i = 0; i < output.size(); ++i)
     {
-        if (input[i] != expected[i])
+        if (output[i] != expected[i])
             std::cout << "error on position " << i 
-                  << ", it should be " << input[i]
-                  << ", but it was " << expected[i] 
+                  << ", it should be " << expected[i]
+                  << ", but it was " << output[i]
                   << " " << std::endl;
     }
 }
@@ -151,18 +161,19 @@ int main(int argc, char **argv) {
             infile.ignore();
     }
 
-    Terminal t(vect);
-    std::cout << "part 1 solution: " << t.compute_with_params(12, 2) << std::endl;
+    test_sample(
+        {1002,4,3,4,33},
+        {1002,4,3,4,99}
+    );
 
-    for (int noun = 0; noun < 100; ++noun){
-        for (int  verb = 0; verb < 100; ++verb){
-                Terminal t(vect);
-                if (t.compute_with_params(noun, verb) == 19690720){
-                std::cout << "part 2 solution: " << 100*noun+verb << std::endl;
-                return EXIT_SUCCESS;
-            }
-        }
-    }
+    test_sample(
+        {1101,100,-1,4,0},
+        {1101,100,-1,4,99}
+    );
+
+    Terminal t(vect);
+    t.compute();
+    std::cout << std::endl;
 
     return EXIT_SUCCESS;
 }
