@@ -1,3 +1,4 @@
+#include  <memory>
 
 class IntCodeComputer {
 private:
@@ -6,6 +7,7 @@ private:
     std::deque<int> stdoutput;
     int pos = 0;
 public:
+    bool paused = false;
     IntCodeComputer(std::vector<int> _mem){
         mem = _mem;
     }
@@ -57,8 +59,9 @@ public:
             //std::cout << "INPUT: " << tmp << std::endl;
         }
         else {
-            std::cout << std::endl << "INPUT: ";
-            std::cin >> tmp;
+            //std::cout << std::endl << "INPUT: ";
+            paused = true;
+            return false;
         }
         mem[a] = tmp;
         return true;
@@ -139,8 +142,10 @@ public:
 
 
     int compute(){
-        pos = 0;
+        paused = false;
         while (true){
+            //std::cout << "OP[" << pos << "]=";
+            //std::cout << mem[pos] << std::endl;
             if (parseHalt())
                 break;
             else if (parseAdd())
@@ -161,7 +166,11 @@ public:
                 pos += 4;
             else
             {
-                std::cout << std::endl <<"NOP:"<< mem[pos];
+                if (paused){
+                    //std::cout << "PAUSED, output:";
+                    break;
+                }
+                //std::cout << std::endl <<"NOP:"<< mem[pos];
                 ++pos;
                 if (pos >= mem.size())
                     break;
@@ -184,13 +193,19 @@ public:
         std::vector<int> input, 
         std::vector<int>& output
     ){
+        //std::cout << "INPUT:  ";
         for (auto i: input){
             stdinput.push_back(i);
+            //std::cout << i << ",";
         }
+        //std::cout << std::endl;
         int result = compute();
+        //std::cout << "OUTPUT: ";
         for (auto o: stdoutput){
             output.push_back(o);
+            //std::cout << o << ",";
         }
+        //std::cout << std::endl;
         return result;
     }
 
